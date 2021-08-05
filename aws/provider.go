@@ -402,6 +402,7 @@ func Provider() *schema.Provider {
 			"aws_service_discovery_dns_namespace":            dataSourceServiceDiscoveryDnsNamespace(),
 			"aws_sfn_activity":                               dataSourceAwsSfnActivity(),
 			"aws_sfn_state_machine":                          dataSourceAwsSfnStateMachine(),
+			"aws_signed_request":                             dataSourceAwsSignedRequest(),
 			"aws_signer_signing_job":                         dataSourceAwsSignerSigningJob(),
 			"aws_signer_signing_profile":                     dataSourceAwsSignerSigningProfile(),
 			"aws_sns_topic":                                  dataSourceAwsSnsTopic(),

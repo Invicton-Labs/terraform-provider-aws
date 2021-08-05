@@ -2498,3 +2498,64 @@ func validateVersionString(v interface{}, k string) (ws []string, errors []error
 
 	return
 }
+
+func validateSignedRequestMethod(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	if len(value) > 255 {
+		errors = append(errors, fmt.Errorf(
+			"%q cannot be longer than 255 characters: %q", k, value))
+	}
+
+	// https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_IpRange.html. Note that
+	// "" is an allowable description value.
+	pattern := `^[A-Za-z0-9 \.\_\-\:\/\(\)\#\,\@\[\]\+\=\&\;\{\}\!\$\*]*$`
+	if !regexp.MustCompile(pattern).MatchString(value) {
+		errors = append(errors, fmt.Errorf(
+			"%q doesn't comply with restrictions (%q): %q",
+			k, pattern, value))
+	}
+	return
+}
+
+func validateUrlHostOnly(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	u, err := url.Parse(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q has to be a valid URL", k))
+		return
+	}
+	if strings.ToLower(u.Scheme) != "https" {
+		errors = append(errors, fmt.Errorf("%q must start with 'https://'", k))
+		// It's improperly formatted so don't bother checking the others
+	} else if len(u.Path) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain a path after the host", k))
+	}
+	if len(u.Fragment) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain a path fragment", k))
+	}
+	if len(u.Query()) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain query parameters", k))
+	}
+	return
+}
+func validateUrlPathOnly(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	u, err := url.Parse(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q has to be a valid URL path", k))
+		return
+	}
+	if len(u.Scheme) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain a scheme", k))
+	}
+	if len(u.Query()) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain query parameters", k))
+	}
+	if len(u.Host) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain a host (path only)", k))
+	}
+	if len(u.Fragment) > 0 {
+		errors = append(errors, fmt.Errorf("%q cannot contain a path fragment", k))
+	}
+	return
+}
